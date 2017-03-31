@@ -7,7 +7,7 @@ node ('hawkular-apm') {
         //sh "pkill standalone || true"
         //echo 'AFTER KILL'
         //sh "pgrep standalone | true"
-         sh "ps -ef  | grep -i standalone | grep -v grep | awk '{print \$2}' | xargs kill -9"
+         sh "ps -ef  | grep -i standalone | grep -v grep | awk '{print \$2}' | xargs kill -9 || true"
             
     } 
     stage('Download') {
@@ -41,7 +41,7 @@ node ('hawkular-apm') {
         [[$class: 'StringParameterValue', name: 'HAWKULAR_APM_URI', value: HAWKULAR_APM_URI],
         [$class: 'StringParameterValue', name: 'HAWKULAR_APM_USERNAME', value: HAWKULAR_APM_PASSWORD],
         [$class: 'StringParameterValue', name: 'HAWKULAR_SERVICE_NAME', value: HAWKULAR_SERVICE_NAME],
-        [$class: 'StringParameterValue', name: 'HAKWULAR_APM_PASSWORD', value: HAKWULAR_APM_PASSWORD]]
+        [$class: 'StringParameterValue', name: 'HAWKULAR_APM_PASSWORD', value: HAWKULAR_APM_PASSWORD]]
     }
     
 }
