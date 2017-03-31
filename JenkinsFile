@@ -1,6 +1,10 @@
 node ('hawkular-apm') {
     stage('Setup') {
         // TODO do we need this?
+        echo 'HAWKULAR_APM_URI ' + HAWKULAR_APM_URI
+        echo 'HAWKULAR_APM_USERNAME ' + HAWKULAR_APM_USERNAME
+        echo 'HAWKULAR_APM_PASSWORD ' + HAWKULAR_APM_PASSWORD
+        echo 'HAWKULAR_SERVICE_NAME ' + HAWKULAR_SERVICE_NAME
 
     }
     stage('Kill Existing Instance') {
