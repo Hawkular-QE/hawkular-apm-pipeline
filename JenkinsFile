@@ -1,0 +1,47 @@
+node ('hawkular-apm') {
+    stage('Setup') {
+        // TODO do we need this?
+
+    }
+    stage('Kill Existing Instance') {
+        //sh "pkill standalone || true"
+        //echo 'AFTER KILL'
+        //sh "pgrep standalone | true"
+         sh "ps -ef  | grep -i standalone | grep -v grep | awk '{print \$2}' | xargs kill -9"
+            
+    } 
+    stage('Download') {
+        if (CLEAN_INSTALL) {
+            // Cleanup workspace before starting
+            //sh "rm -rf hawkular-apm-dist*"
+            sh "rm -rf *"
+            sh "wget --quiet https://github.com/hawkular/hawkular-apm/releases/download/${BUILD}/hawkular-apm-dist-${BUILD}.tar"
+            sh "tar -xf hawkular-apm-dist-${BUILD}.tar"
+            sh "echo 'script.disable_dynamic: true' >> standalone/configuration/hawkular-elasticsearch.properties"
+            sh "tail standalone/configuration/hawkular-elasticsearch.properties"        
+            sh "ls -alF"
+    
+            sh "bin/add-user.sh -a -u " + HAWKULAR_APM_USERNAME + " -p " + HAWKULAR_APM_PASSWORD +" -g read-write,read-only"
+        }
+    }
+    stage('Startup') {
+        sh "BUILD_ID=dontKillMe nohup bin/standalone.sh -b 0.0.0.0 -Djboss.http.port=8080 &"
+    }
+    stage('Wait till running') {
+        timeout(time: 5, unit: 'MINUTES') {
+            waitUntil {
+                def r = sh script: 'wget -q ' + HAWKULAR_APM_URI + '/hawkular-ui/apm -O /dev/null', returnStatus: true
+                return (r == 0);
+            }
+        }
+    }
+    stage('populate') {
+        // TODO add variables to this job; also, make it an option     'http://209.132.178.130:8080/'
+        build job: 'populate-apm-pipeline', parameters:
+        [[$class: 'StringParameterValue', name: 'HAWKULAR_APM_URI', value: HAWKULAR_APM_URI],
+        [$class: 'StringParameterValue', name: 'HAWKULAR_APM_USERNAME', value: HAWKULAR_APM_PASSWORD],
+        [$class: 'StringParameterValue', name: 'HAWKULAR_SERVICE_NAME', value: HAWKULAR_SERVICE_NAME],
+        [$class: 'StringParameterValue', name: 'HAKWULAR_APM_PASSWORD', value: HAKWULAR_APM_PASSWORD]]
+    }
+    
+}
