@@ -14,7 +14,7 @@ node ('hawkular-apm') {
          sh "ps -ef  | grep -i standalone | grep -v grep | awk '{print \$2}' | xargs kill -9 || true"
     }
     stage('Download') {
-        if (CLEAN_INSTALL) {
+        if (CLEAN_INSTALL) {   // FIXME, this is not a boolean
             // Cleanup workspace before starting
             sh "rm -rf *"
             sh "wget --quiet https://github.com/hawkular/hawkular-apm/releases/download/${BUILD}/hawkular-apm-dist-${BUILD}.tar"
@@ -41,7 +41,7 @@ node ('hawkular-apm') {
         // TODO make this optional?
         build job: 'populate-apm-pipeline', parameters:
             [[$class: 'StringParameterValue', name: 'HAWKULAR_APM_URI', value: 'http://209.132.178.130:8080/'],    // FIXME!
-            [$class: 'StringParameterValue', name: 'HAWKULAR_APM_USERNAME', value: HAWKULAR_APM_PASSWORD],
+            [$class: 'StringParameterValue', name: 'HAWKULAR_APM_USERNAME', value: HAWKULAR_APM_USERNAME],
             [$class: 'StringParameterValue', name: 'HAWKULAR_SERVICE_NAME', value: HAWKULAR_SERVICE_NAME],
             [$class: 'StringParameterValue', name: 'HAWKULAR_APM_PASSWORD', value: HAWKULAR_APM_PASSWORD]]
     }
