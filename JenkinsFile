@@ -1,4 +1,4 @@
-node ('hawkular-apm') {
+node {
     stage('Setup') {
         // All of the values listed here are required parameters for this job
         echo 'Run with: '
