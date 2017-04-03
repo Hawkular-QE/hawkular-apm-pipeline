@@ -11,7 +11,7 @@ node {
 
     }
     stage('Kill Existing Instance') {
-         sh "ps -ef  | grep -i standalone | grep -v grep | awk '{print \$2}' | xargs kill -9 || true"
+// FIXME         sh "ps -ef  | grep -i standalone | grep -v grep | awk '{print \$2}' | xargs kill -9 || true"
     }
     stage('Download') {
         if (CLEAN_INSTALL) {   // FIXME, this is not a boolean
