@@ -17,7 +17,8 @@ node {
         if (CLEAN_INSTALL) {   // FIXME, this is not a boolean
             // Cleanup workspace before starting
             sh "rm -rf *"
-            sh "wget --quiet https://github.com/hawkular/hawkular-apm/releases/download/${BUILD}/hawkular-apm-dist-${BUILD}.tar"
+            //sh "wget --quiet https://github.com/hawkular/hawkular-apm/releases/download/${BUILD}/hawkular-apm-dist-${BUILD}.tar"
+            sh "curl --location --output hawkular-apm-dist-${BUILD}.tar https://github.com/hawkular/hawkular-apm/releases/download/${BUILD}/hawkular-apm-dist-${BUILD}.tar"
             sh "tar -xf hawkular-apm-dist-${BUILD}.tar"
             sh "echo 'script.disable_dynamic: true' >> standalone/configuration/hawkular-elasticsearch.properties"
             sh "tail standalone/configuration/hawkular-elasticsearch.properties"        
