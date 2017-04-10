@@ -1,5 +1,5 @@
 node {
-    stage('Setup') {
+    stage('Setup environment') {
         // All of the values listed here are required parameters for this job
         echo 'Run with: '
         echo 'BUILD ' + BUILD
@@ -15,13 +15,13 @@ node {
         env.JAVA_HOME = "${JAVA_HOME}"
         env.M2_HOME = "${M2_HOME}"
         env.PATH = "${M2_HOME}/bin:${JAVA_HOME}/bin:${env.PATH}"
-
     }
     stage('Kill Existing Instance') {
-        sh "ps -ef  | grep -i standalone | grep -v grep | awk '{print \$2}' | xargs kill -9 || true"
+        // sh "ps -ef  | grep -i standalone | grep -v grep | awk '{print \$2}' | xargs kill -9 || true"
+        sh "docker ps | grep hawkular-apm  | awk '{print $1}' | xargs docker stop || true"
     }
-    stage('Download') {
-        if (CLEAN_INSTALL == "yes") {   // FIXME, this is not a boolean
+    stage('Download build') {
+        /*if (CLEAN_INSTALL == "yes") {   // FIXME, this is not a boolean
             // Cleanup workspace before starting
             sh "rm -rf *"
             //sh "wget --quiet https://github.com/hawkular/hawkular-apm/releases/download/${BUILD}/hawkular-apm-dist-${BUILD}.tar"
@@ -32,10 +32,12 @@ node {
             sh "ls -alF"
     
             sh "bin/add-user.sh -a -u " + HAWKULAR_APM_USERNAME + " -p " + HAWKULAR_APM_PASSWORD +" -g read-write,read-only"
-        }
+        } */
+
     }
-    stage('Startup') {
-        sh "BUILD_ID=dontKillMe nohup bin/standalone.sh -b 0.0.0.0 -Djboss.http.port=8080 &"
+    stage('Startup APM Server') {
+        //sh "BUILD_ID=dontKillMe nohup bin/standalone.sh -b 0.0.0.0 -Djboss.http.port=8080 &"
+        sh "BUILD_ID=dontKillMe nohup docker run -p 8080:8080 jboss/hawkular-apm-server-dev &"
     }
     stage('Wait till running') {
         timeout(time: 5, unit: 'MINUTES') {
