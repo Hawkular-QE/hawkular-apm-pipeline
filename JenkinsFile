@@ -51,7 +51,7 @@ node {
         git 'https://github.com/Hawkular-QE/hawkular-apm-qe.git'
         sh "mvn -Dmaven.test.failure.ignore clean test"
     }
-    state('Record test results') {
+    stage('Record test results') {
         junit '**/target/surefire-reports/TEST-*.xml'
     }
     stage('populate') {
