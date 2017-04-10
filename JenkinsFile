@@ -2,7 +2,6 @@ node {
     stage('Setup environment') {
         // All of the values listed here are required parameters for this job
         echo 'Run with: '
-        echo 'BUILD ' + BUILD
         echo 'HAWKULAR_APM_URI ' + HAWKULAR_APM_URI
         echo 'HAWKULAR_APM_USERNAME ' + HAWKULAR_APM_USERNAME
         echo 'HAWKULAR_APM_PASSWORD ' + HAWKULAR_APM_PASSWORD
