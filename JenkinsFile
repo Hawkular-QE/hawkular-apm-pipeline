@@ -3,7 +3,6 @@ node {
         // All of the values listed here are required parameters for this job
         echo 'Run with: '
         echo 'BUILD ' + BUILD
-        echo 'CLEAN_INSTALL ' + CLEAN_INSTALL
         echo 'HAWKULAR_APM_URI ' + HAWKULAR_APM_URI
         echo 'HAWKULAR_APM_USERNAME ' + HAWKULAR_APM_USERNAME
         echo 'HAWKULAR_APM_PASSWORD ' + HAWKULAR_APM_PASSWORD
@@ -17,29 +16,12 @@ node {
         env.PATH = "${M2_HOME}/bin:${JAVA_HOME}/bin:${env.PATH}"
     }
     stage('Kill Existing Instance') {
-        // sh "ps -ef  | grep -i standalone | grep -v grep | awk '{print \$2}' | xargs kill -9 || true"
         sh "docker ps | grep hawkular-apm  | awk '{print \$1}' | xargs docker stop || true"
     }
-    stage('Download build') {
-        /*if (CLEAN_INSTALL == "yes") {   // FIXME, this is not a boolean
-            // Cleanup workspace before starting
-            sh "rm -rf *"
-            //sh "wget --quiet https://github.com/hawkular/hawkular-apm/releases/download/${BUILD}/hawkular-apm-dist-${BUILD}.tar"
-            sh "curl --location --output hawkular-apm-dist-${BUILD}.tar https://github.com/hawkular/hawkular-apm/releases/download/${BUILD}/hawkular-apm-dist-${BUILD}.tar"
-            sh "tar -xf hawkular-apm-dist-${BUILD}.tar"
-            sh "echo 'script.disable_dynamic: true' >> standalone/configuration/hawkular-elasticsearch.properties"
-            sh "tail standalone/configuration/hawkular-elasticsearch.properties"        
-            sh "ls -alF"
-    
-            sh "bin/add-user.sh -a -u " + HAWKULAR_APM_USERNAME + " -p " + HAWKULAR_APM_PASSWORD +" -g read-write,read-only"
-        } */
-
-    }
     stage('Startup APM Server') {
-        //sh "BUILD_ID=dontKillMe nohup bin/standalone.sh -b 0.0.0.0 -Djboss.http.port=8080 &"
         sh "BUILD_ID=dontKillMe nohup docker run -p 8080:8080 jboss/hawkular-apm-server-dev &"
     }
-    stage('Wait till running') {
+    stage('Wait until server is available') {
         timeout(time: 5, unit: 'MINUTES') {
             waitUntil {
                 def r = sh script: 'wget -q ' + HAWKULAR_APM_URI + '/hawkular-ui/apm -O /dev/null', returnStatus: true
@@ -49,13 +31,12 @@ node {
     }
     stage('Build and run tests') {
         git 'https://github.com/Hawkular-QE/hawkular-apm-qe.git'
-        sh "mvn -Dmaven.test.failure.ignore clean test"
+        sh "mvn -Dmaven.test.failure.ignore clean -Dtest=TagAndDurationTests test"    //FIXME get all tests to run
     }
     stage('Record test results') {
         junit '**/target/surefire-reports/TEST-*.xml'
     }
     stage('populate') {
-        // TODO make this optional?
         build job: 'populate-apm-pipeline', parameters:
             [[$class: 'StringParameterValue', name: 'HAWKULAR_APM_URI', value: HAWKULAR_APM_URI],    // FIXME!
             [$class: 'StringParameterValue', name: 'HAWKULAR_APM_USERNAME', value: HAWKULAR_APM_USERNAME],
