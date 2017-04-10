@@ -18,7 +18,7 @@ node {
     }
     stage('Kill Existing Instance') {
         // sh "ps -ef  | grep -i standalone | grep -v grep | awk '{print \$2}' | xargs kill -9 || true"
-        sh "docker ps | grep hawkular-apm  | awk '{print $1}' | xargs docker stop || true"
+        sh "docker ps | grep hawkular-apm  | awk '{print \$1}' | xargs docker stop || true"
     }
     stage('Download build') {
         /*if (CLEAN_INSTALL == "yes") {   // FIXME, this is not a boolean
