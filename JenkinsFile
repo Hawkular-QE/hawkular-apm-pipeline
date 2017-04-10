@@ -9,6 +9,13 @@ node {
         echo 'HAWKULAR_APM_PASSWORD ' + HAWKULAR_APM_PASSWORD
         echo 'HAWKULAR_SERVICE_NAME ' + HAWKULAR_SERVICE_NAME
 
+        // Set up environment for tests
+        def M2_HOME = tool 'maven-3.3.9'
+        def JAVA_HOME = tool 'jdk8'
+        env.JAVA_HOME = "${JAVA_HOME}"
+        env.M2_HOME = "${M2_HOME}"
+        env.PATH = "${M2_HOME}/bin:${JAVA_HOME}/bin:${env.PATH}"
+
     }
     stage('Kill Existing Instance') {
         sh "ps -ef  | grep -i standalone | grep -v grep | awk '{print \$2}' | xargs kill -9 || true"
@@ -37,6 +44,13 @@ node {
                 return (r == 0);
             }
         }
+    }
+    stage('Build and run tests') {
+        git 'https://github.com/Hawkular-QE/hawkular-apm-qe.git'
+        sh "mvn -Dmaven.test.failure.ignore clean test"
+    }
+    state('Record test results') {
+        junit '**/target/surefire-reports/TEST-*.xml'
     }
     stage('populate') {
         // TODO make this optional?
