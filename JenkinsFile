@@ -27,10 +27,12 @@ node {
                 return (r == 0);
             }
         }
+
+        sleep 10 // FIXME I had to add this for Docker, but shouldn't need it
     }
     stage('Build and run tests') {
         git 'https://github.com/Hawkular-QE/hawkular-apm-qe.git'
-        sh "mvn -Dmaven.test.failure.ignore clean -Dtest=TagAndDurationTests test"    //FIXME get all tests to run
+        sh "mvn -Dmaven.test.failure.ignore clean test"    //FIXME get all tests to run
     }
     stage('Record test results') {
         junit '**/target/surefire-reports/TEST-*.xml'
